@@ -23,13 +23,15 @@ import WebMrpValidationProvider from "./data_aware/webmrp_validation_provider.js
 import { Grid } from 'ag-grid-community';
 import { providerTypes } from "./data_aware/dsqltorest_provider.js";
 import { v4 as uuidv4 } from "uuid";
+import { trace } from "../common/misc.js";
+const _ = require("lodash");
 
 UIkit.use(Icons);
 
-const host = "http://127.0.0.1:9001",
-      formsHost = "http://127.0.0.1:9001";
+// proxy configuration at webpack.config.js
+const host = _.trimEnd(window.location.href, "/"),
+      formsHost = host;
 
-// TODO: add provider as a plugin so code doesn't need to change to set a different provider
 const ComplexFormProvider = WebMrpFormsProvider,
       ValidationProvider = WebMrpValidationProvider,
       DataProvider  = WebMrpDataProvider;
@@ -41,6 +43,7 @@ const context = {
     formsHost,
     i18n: I18n("pt-BR"),
     uuidGen: uuidv4,
+    trace,
 
     UIkit,
     BaseComponent,

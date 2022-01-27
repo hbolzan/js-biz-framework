@@ -15,7 +15,7 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['*', '.js']
+        extensions: ['*', '.js'],
     },
     output: {
         path: __dirname + '/dist',
@@ -23,6 +23,15 @@ module.exports = {
         filename: 'bundle.js'
     },
     devServer: {
-        contentBase: './dist'
+        contentBase: './dist',
+        watchOptions: {
+            ignored: "**/.#*"
+        },
+        proxy: {
+            "/api": {
+                target: "http://localhost:8080",
+                router: () => "http://127.0.0.1:9001",
+            }
+        }
     }
 };

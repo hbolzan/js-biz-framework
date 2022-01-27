@@ -3,7 +3,7 @@ import { assocIf } from "../../logic/misc.js";
 const stdBuildUrl = ({ host }, resource) => `${ host }${ resource }`;
 
 function _get(context, resource) {
-    return context.global.fetch(context.buildUrl(context, resource), {
+    return context.global.fetch(context.trace(context.buildUrl(context, resource)), {
         method: "GET",
         mode: "cors",
     }).then(r => r.json());
@@ -20,7 +20,7 @@ function _delete(context, resource) {
 
 function _send(method, context, resource, payload) {
     return context.global.fetch(
-        context.buildUrl(context, resource),
+        context.trace(context.buildUrl(context, resource)),
         assocIf(
             {
                 method: method,
