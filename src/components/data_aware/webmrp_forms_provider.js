@@ -13,7 +13,7 @@ const fieldsDefs = _.map([
 ], fieldName => ({ name: fieldName }));
 
 function urlBuilder({ formsHost }, formId) {
-    return `${ formsHost }/${ baseUrl }/${ formId }`;
+    return `${ formsHost }${ baseUrl }/${ formId }`;
 }
 
 function isSearchField(fieldDef) {

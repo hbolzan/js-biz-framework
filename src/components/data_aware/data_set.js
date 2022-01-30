@@ -192,16 +192,17 @@ function DataSet(context) {
 
     function commit() {
         throwIfInactive(self, data);
-        if ( data.state != datasetStates.browse ) {
-            self.post();
-        }
-        if ( ! data.pending ) {
-            return;
-        }
-        self.events.run(events.beforeCommit, [self]);
-        self.events.run(events.onCommit, [self, rollbackRows, data.rows]);
-        data.pending = false;
-        self.events.run(events.afterCommit, [self]);
+        self.events.runConfirmation(events.beforeCommit, [self, data.rows[data.recordIndex]], (args) => {
+            if ( data.state != datasetStates.browse ) {
+                self.post();
+            }
+            if ( ! data.pending ) {
+                return;
+            }
+            self.events.run(events.onCommit, [self, rollbackRows, data.rows]);
+            data.pending = false;
+            self.events.run(events.afterCommit, [self]);
+        });
     }
 
     function _delete() {
