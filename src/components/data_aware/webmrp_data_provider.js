@@ -1,4 +1,5 @@
 import { withQueryParams } from "../../logic/http.js";
+import { rowsDiff } from "../../logic/data_provider.js";
 const baseUrl = "/api/data";
 
 function oneUrl({ host }, { key }, provider, source) {
@@ -45,12 +46,17 @@ function getOne(connection, dataSet, key) {
         .then(ds => ds.rows()[0]);
 }
 
+// preparation for composite queries
+const preparedQuery = query => btoa(JSON.stringify(query));
+
 function WebMrpDataProvider(context, params={}) {
     let self = context.BaseComponent(),
         lastSearchValue;
 
     const connection = context.HttpConnection({ ...context, buildUrl: buildUrl(params) }),
           dataSet = context.DataSet({ fieldsDefs: params.fieldsDefs, ...context });
+
+    dataSet.onCommit((ds, oldRows, newRows) => console.log(rowsDiff(oldRows, newRows)));
 
     function search(searchValue, searchFilter) {
         return get(connection, dataSet, { mode: "search", searchValue, searchFilter });

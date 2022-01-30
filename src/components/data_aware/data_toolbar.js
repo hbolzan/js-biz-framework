@@ -21,7 +21,7 @@ function groupedActions({ dataProvider, search }) {
             [toolbarActions.append.action]: () => dataProvider.dataSet.append(),
             [toolbarActions.delete.action]: () => dataProvider.dataSet.delete(),
             [toolbarActions.edit.action]: () => dataProvider.dataSet.edit(),
-            [toolbarActions.confirm.action]: () => dataProvider.dataSet.confirm(),
+            [toolbarActions.confirm.action]: () => dataProvider.dataSet.commit(),
             [toolbarActions.dismiss.action]: () => dataProvider.dataSet.cancel(),
         },
         [actionGroups.additional]: {

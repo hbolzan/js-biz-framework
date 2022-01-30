@@ -89,7 +89,14 @@ function ComplexForm(context, complexId, parentNodeId) {
     function setDatasetEventHandlers() {
         dataProvider.dataSet.beforeDelete((args) => {
             return UIkit.modal.confirm(
-                translate("Delete the current record?"),
+                translate("Delete current record?"),
+                { labels: { cancel: translate("Dismiss"), ok: translate("Confirm") } }
+            );
+        });
+
+        dataProvider.dataSet.beforeCommit((args) => {
+            return UIkit.modal.confirm(
+                translate("Confirm changes to current record?"),
                 { labels: { cancel: translate("Dismiss"), ok: translate("Confirm") } }
             );
         });

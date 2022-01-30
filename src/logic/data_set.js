@@ -9,7 +9,7 @@ const datasetStates = {
     insert: "insert",
 };
 
-const recordSates = {
+const recordStates = {
     new: "new",
     browse: "browse",
     edit: "edit",
@@ -64,4 +64,4 @@ function deleteRow(data) {
     );
 };
 
-export { datasetStates, recordSates, dataFields, newRow, appendRow, deleteRow };
+export { datasetStates, recordStates, dataFields, newRow, appendRow, deleteRow };
