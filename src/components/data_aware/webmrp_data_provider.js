@@ -46,6 +46,16 @@ function getOne(connection, dataSet, key) {
         .then(ds => ds.rows()[0]);
 }
 
+function _delete({ UIkit, i18n }, connection, deletedRow, { pkFields }) {
+    console.log(deletedRow);
+    try {
+        return connection.delete({ mode: "one", "key": deletedRow[pkFields[0]] });
+    } catch(e) {
+        UIkit.modal.alert(i18n.translate("Delete Error"));
+        throw e;
+    }
+}
+
 // preparation for composite queries
 const preparedQuery = query => btoa(JSON.stringify(query));
 
@@ -57,6 +67,7 @@ function WebMrpDataProvider(context, params={}) {
           dataSet = context.DataSet({ fieldsDefs: params.fieldsDefs, ...context });
 
     dataSet.onCommit((ds, oldRows, newRows) => console.log(rowsDiff(oldRows, newRows)));
+    dataSet.onDelete((ds, deletedRow) => _delete(context, connection, deletedRow, params));
 
     function search(searchValue, searchFilter) {
         return get(connection, dataSet, { mode: "search", searchValue, searchFilter });

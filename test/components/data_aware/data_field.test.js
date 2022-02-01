@@ -4,7 +4,6 @@ import DataField from "../../../src/components/data_aware/data_field.js";
 const mockedDataSet = {
     afterPost: jest.fn(),
     onDataChange: jest.fn(),
-    onStateChange: jest.fn(),
 };
 
 const fieldsDefs = [
@@ -18,7 +17,6 @@ describe("DataField", () => {
         DataField({ BaseComponent }, fieldsDefs[0], mockedDataSet);
         expect(mockedDataSet.afterPost).toHaveBeenCalled();
         expect(mockedDataSet.onDataChange).toHaveBeenCalled();
-        expect(mockedDataSet.onStateChange).toHaveBeenCalled();
     });
 
     it("is initialized with fieldDef default value", () => {
@@ -66,7 +64,6 @@ const mockedDataSetWithEvents = Object.assign(
     {
         afterPost: handler => base.events.on("afterPost", handler),
         onDataChange: handler => base.events.on("onDataChange", mockedChangeHandler),
-        onStateChange: jest.fn(),
         post: () => base.events.run("afterPost", []),
         change: () => base.events.run("onDataChange", [base]),
     },

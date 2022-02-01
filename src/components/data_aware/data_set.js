@@ -17,6 +17,7 @@ const events = {
     onCommit: "onCommit",
     afterCommit: "afterCommit",
     beforeDelete: "beforeDelete",
+    onDelete: "onDelete",
     afterDelete: "afterDelete",
     onStateChange: "onStateChange",
     onDataChange: "onDataChange",
@@ -192,28 +193,40 @@ function DataSet(context) {
 
     function commit() {
         throwIfInactive(self, data);
-        self.events.runConfirmation(events.beforeCommit, [self, data.rows[data.recordIndex]], (args) => {
+        if ( ! data.pending && data.state === datasetStates.browse) {
+            return;
+        }
+        self.events.runConfirmation(events.beforeCommit, [self, data.rows[data.recordIndex]], args => {
             if ( data.state != datasetStates.browse ) {
                 self.post();
             }
-            if ( ! data.pending ) {
-                return;
-            }
             self.events.run(events.onCommit, [self, rollbackRows, data.rows]);
             data.pending = false;
+            setRollbackData();
             self.events.run(events.afterCommit, [self]);
         });
     }
 
-    function _delete() {
-        let recordCount = data.rows.length;
-        self.events.runConfirmation(events.beforeDelete, [self, data.rows[data.recordIndex]], (args) => {
+    function doDelete(recordCount, deletedRow) {
+        self.events.runConfirmation(events.onDelete, [self, deletedRow], args => {
             data = deleteRow(data);
             if (recordCount != data.rows.length) {
+                data.pending = false;
+                setRollbackData();
                 self.events.run(events.afterDelete, [self]);
                 runOnDataChangeEvent();
             }
         });
+    }
+
+    function _delete() {
+        const recordCount = data.rows.length,
+              deletedRow = data.rows[data.recordIndex];
+        self.events.runConfirmation(
+            events.beforeDelete,
+            [self, data.rows[data.recordIndex]],
+            args => doDelete(data.rows.length, deletedRow)
+        );
     }
 
     function navigate(direction, gotoIndex) {

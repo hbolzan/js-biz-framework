@@ -326,6 +326,7 @@ describe("DataSet actions", () => {
             dataSet.post();
             expect(dataSet.pending()).toBeTruthy();
 
+            beforeCommit.mockReturnValue(true);
             dataSet.commit();
             expect(dataSet.pending()).toBeFalsy();
 
@@ -333,7 +334,7 @@ describe("DataSet actions", () => {
             expect(afterCommit).toHaveBeenCalledTimes(1);
         });
 
-        it("does nothing if there data is not pending", () => {
+        it("does nothing if there is no pending data", () => {
             let dataSet =  DataSet({ BaseComponent, DataField, fieldsDefs }),
                 beforeCommit = jest.fn(),
                 afterCommit = jest.fn();
@@ -353,6 +354,7 @@ describe("DataSet actions", () => {
         it("posts before commit if state is not browse", () => {
             let dataSet =  DataSet({ BaseComponent, DataField, fieldsDefs }),
                 onStateChange = jest.fn(),
+                onDataChange = jest.fn(),
                 beforePost = jest.fn(),
                 afterPost = jest.fn(),
                 beforeCommit = jest.fn(),
@@ -364,12 +366,19 @@ describe("DataSet actions", () => {
             dataSet.afterPost(afterPost);
             dataSet.beforeCommit(beforeCommit);
             dataSet.afterCommit(afterCommit);
+            dataSet.onDataChange(onDataChange);
+
+            // if beforeCommit event is set, it should return true to confirm commit
+            beforeCommit.mockReturnValue(true);
 
             expect(dataSet.pending()).toBeFalsy();
+            dataSet.first();
             dataSet.edit();
+            dataSet.setData("a", 1001);
             dataSet.commit();
             expect(dataSet.pending()).toBeFalsy();
 
+            expect(onDataChange).toHaveBeenCalledTimes(1);
             expect(onStateChange).toHaveBeenCalledTimes(2);
             expect(beforePost).toHaveBeenCalledTimes(1);
             expect(afterPost).toHaveBeenCalledTimes(1);
