@@ -47,13 +47,16 @@ function getOne(connection, dataSet, key) {
 }
 
 function _delete({ UIkit, i18n }, connection, deletedRow, { pkFields }) {
-    console.log(deletedRow);
     try {
         return connection.delete({ mode: "one", "key": deletedRow[pkFields[0]] });
     } catch(e) {
         UIkit.modal.alert(i18n.translate("Delete Error"));
         throw e;
     }
+}
+
+function put(connection, modifiedRows ) {
+    return connection.put({ key: modifiedRow})
 }
 
 // preparation for composite queries
@@ -66,7 +69,7 @@ function WebMrpDataProvider(context, params={}) {
     const connection = context.HttpConnection({ ...context, buildUrl: buildUrl(params) }),
           dataSet = context.DataSet({ fieldsDefs: params.fieldsDefs, ...context });
 
-    dataSet.onCommit((ds, oldRows, newRows) => console.log(rowsDiff(oldRows, newRows)));
+    dataSet.onCommit((ds, oldRows, newRows) => console.log(rowsDiff(params.pkFields, oldRows, newRows)));
     dataSet.onDelete((ds, deletedRow) => _delete(context, connection, deletedRow, params));
 
     function search(searchValue, searchFilter) {
