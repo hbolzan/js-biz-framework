@@ -20,6 +20,7 @@ function rowsDiff(pkFields, _oldRows, _newRows) {
                   return newRows.concat({
                       ...modifiedAttrs(_oldRows[i], row),
                       [pkField]: row[pkField],
+                      __pk__: pkField,
                   });
               }
               return newRows;

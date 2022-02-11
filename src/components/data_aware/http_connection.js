@@ -30,7 +30,7 @@ function _send(method, context, resource, payload) {
                 }
             },
             "body",
-            payload ? context.JSON.stringify(payload) : null
+            payload ? JSON.stringify(payload) : null
         )
     ).then(r => r.json());
 }
