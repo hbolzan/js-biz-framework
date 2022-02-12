@@ -29,6 +29,24 @@ function rowsDiff(pkFields, _oldRows, _newRows) {
     return modifiedRows;
 }
 
+function responseIsOk(resp) {
+    return resp.status === "OK";
+}
+
+function indexByPk(ds, diff) {
+    const pk = first(diff).__pk__,
+          id = first(diff)[pk];
+    return first(ds.find(row => row[pk] === id));
+}
+
+function withModifiedRowIndex(resp, ds, diff) {
+    if ( ! responseIsOk(resp) ) {
+        return null;
+    }
+    return { resp, index: indexByPk(ds, diff) };
+}
+
 export {
     rowsDiff,
+    withModifiedRowIndex,
 };

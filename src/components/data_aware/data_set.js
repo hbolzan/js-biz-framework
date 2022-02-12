@@ -239,6 +239,15 @@ function DataSet(context) {
         };
     }
 
+    function silentlySetRow(rowIndex, row) {
+        if ( _.isNull(rowIndex) ) {
+            return;
+        }
+        throwIfInactive(self, data);
+        data.rows[rowIndex] = row;
+        runOnDataChangeEvent();
+    }
+
     function setData(fieldName, value) {
         throwIfInactive(self, data);
         self.edit();
@@ -293,6 +302,7 @@ function DataSet(context) {
 
             loadData,
             clear,
+            silentlySetRow,
             setData,
             append,
             edit,
