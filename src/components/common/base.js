@@ -19,7 +19,7 @@ function runConfirmationEvent(event, registeredEvents, args, callback) {
     }
 
     function handleFunctionResult(handled, handlers) {
-        if (isPromise(handled)) {
+        if ( isPromise(handled) ) {
             return handlePromise(handled, handlers);
         }
         if ( handled ) {
@@ -34,7 +34,7 @@ function runConfirmationEvent(event, registeredEvents, args, callback) {
         }
 
         if ( _.isFunction(handler) ) {
-            return handleFunctionResult(handler(args), handlers);
+            return handleFunctionResult(handler(...args), handlers);
         }
         return runHandlers(handlers.slice(1));
     }

@@ -1,5 +1,5 @@
 import { withQueryParams } from "../../logic/http.js";
-import { rowsDiff } from "../../logic/data_provider.js";
+import { rowsDiff, withModifiedRowIndex } from "../../logic/data_provider.js";
 const baseUrl = "/api/data";
 
 function oneUrl({ host }, { key }, provider, source) {
@@ -46,6 +46,26 @@ function getOne(connection, dataSet, key) {
         .then(ds => ds.rows()[0]);
 }
 
+function _delete({ UIkit, i18n }, connection, deletedRow, { pkFields }) {
+    try {
+        return connection.delete({ mode: "one", "key": deletedRow[pkFields[0]] });
+    } catch(e) {
+        UIkit.modal.alert(i18n.translate("Delete Error"));
+        throw e;
+    }
+}
+
+function putOne(context, connection, modifiedRow, { pkFields }) {
+    return connection.put({ mode: "one", "key": modifiedRow[pkFields[0]] }, modifiedRow);
+}
+
+function put(context, connection, modifiedRows, { pkFields }) {
+    if ( modifiedRows.length === 1 ) {
+        return putOne(context, connection, modifiedRows[0], { pkFields });
+    }
+    // return connection.put({ key: modifiedRows });
+}
+
 // preparation for composite queries
 const preparedQuery = query => btoa(JSON.stringify(query));
 
@@ -56,7 +76,15 @@ function WebMrpDataProvider(context, params={}) {
     const connection = context.HttpConnection({ ...context, buildUrl: buildUrl(params) }),
           dataSet = context.DataSet({ fieldsDefs: params.fieldsDefs, ...context });
 
-    dataSet.onCommit((ds, oldRows, newRows) => console.log(rowsDiff(oldRows, newRows)));
+    function datasetOnCommit(ds, oldRows, newRows) {
+        const diff = rowsDiff(params.pkFields, oldRows, newRows);
+        put(context, connection, diff, params)
+            .then(resp => withModifiedRowIndex(resp, ds, diff))
+            .then(r => ds.silentlySetRow(r.index, r.resp.data[0]));
+    }
+
+    dataSet.onCommit(datasetOnCommit);
+    dataSet.onDelete((ds, deletedRow) => _delete(context, connection, deletedRow, params));
 
     function search(searchValue, searchFilter) {
         return get(connection, dataSet, { mode: "search", searchValue, searchFilter });

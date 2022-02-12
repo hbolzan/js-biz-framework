@@ -42,6 +42,7 @@ function ComplexForm(context, complexId, parentNodeId) {
                     queryId: data["dataset-name"],
                     searchDataset: data["search-dataset"] || data["dataset-name"],
                     searchFields: data["search-fields"],
+                    pkFields: data["pk-fields"],
                 }
             );
             setDatasetEventHandlers();

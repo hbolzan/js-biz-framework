@@ -16,6 +16,7 @@ const translations = {
             "Search by all available fields in any part of the text": "Pesquisar por todos os campos disponíveis em qualquer parte do texto",
             "Delete current record?": "Excluir este registro?",
             "Confirm changes to current record?": "Confirma alterações neste registro?",
+            "Delete Error": "Ocorreu um erro ao tentar excluir o registro atual",
             abbreviatedWeekDays: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
             abbreviatedMonthsNames: [
                 "Jan",
