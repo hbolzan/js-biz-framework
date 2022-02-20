@@ -29,6 +29,11 @@ function rowsDiff(pkFields, _oldRows, _newRows) {
     return modifiedRows;
 }
 
+function appendedRows(pkFields, newRows) {
+    const pkField = first(pkFields);
+    return newRows.filter(row => _.isNull(row[pkField]));
+}
+
 function responseIsOk(resp) {
     return resp.status === "OK";
 }
@@ -49,4 +54,5 @@ function withModifiedRowIndex(resp, ds, diff) {
 export {
     rowsDiff,
     withModifiedRowIndex,
+    appendedRows,
 };

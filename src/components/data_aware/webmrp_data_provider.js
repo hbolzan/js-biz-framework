@@ -1,5 +1,6 @@
 import { withQueryParams } from "../../logic/http.js";
-import { rowsDiff, withModifiedRowIndex } from "../../logic/data_provider.js";
+import { rowsDiff, withModifiedRowIndex, appendedRows } from "../../logic/data_provider.js";
+import { datasetStates } from "../../logic/data_set.js";
 const baseUrl = "/api/data";
 
 function oneUrl({ host }, { key }, provider, source) {
@@ -11,6 +12,10 @@ function searchUrl({ host }, { searchValue, searchFilter }, provider, source, se
         `${ host }${ baseUrl }/${ provider }/${ source }`,
         { searchValue, searchFields, ...searchFilter }
     );
+}
+
+function postUrl({ host }, provider, source) {
+    return `${ host }${ baseUrl }/${ provider }/${ source }`;
 }
 
 function expandedResource(resource) {
@@ -27,6 +32,9 @@ function buildUrl({ searchDataset, searchFields, filterBy, filterWith }) {
         const { mode, key } = params;
         if ( mode === "one" ) {
             return oneUrl(context, params, provider, source);
+        }
+        if ( mode === "post" ) {
+            return postUrl(context, provider, source);
         }
         return searchUrl(context, params, provider, source, searchFields);
     };
@@ -56,7 +64,10 @@ function _delete({ UIkit, i18n }, connection, deletedRow, { pkFields }) {
 }
 
 function putOne(context, connection, modifiedRow, { pkFields }) {
-    return connection.put({ mode: "one", "key": modifiedRow[pkFields[0]] }, modifiedRow);
+    return connection.put(
+        { mode: "one", "key": modifiedRow[pkFields[0]] },
+        { pk: pkFields[0], pkValue: modifiedRow[pkFields[0]], data: modifiedRow }
+    );
 }
 
 function put(context, connection, modifiedRows, { pkFields }) {
@@ -64,6 +75,17 @@ function put(context, connection, modifiedRows, { pkFields }) {
         return putOne(context, connection, modifiedRows[0], { pkFields });
     }
     // return connection.put({ key: modifiedRows });
+}
+
+function postOne(context, connection, appendedRow, { pkFields }) {
+    return connection.post({ mode: "post" }, { pk: pkFields[0], data: appendedRow });
+}
+
+function post(context, connection, appendedRows, { pkFields }) {
+    if ( appendedRows.length === 1 ) {
+        return postOne(context, connection, appendedRows[0], { pkFields });
+    }
+    // return connection.post({ mode: "post" }, { pk: pkFields[0], data: appendedRows });
 }
 
 // preparation for composite queries
@@ -76,11 +98,23 @@ function WebMrpDataProvider(context, params={}) {
     const connection = context.HttpConnection({ ...context, buildUrl: buildUrl(params) }),
           dataSet = context.DataSet({ fieldsDefs: params.fieldsDefs, ...context });
 
-    function datasetOnCommit(ds, oldRows, newRows) {
+    function commitEdited(ds, oldRows, newRows) {
         const diff = rowsDiff(params.pkFields, oldRows, newRows);
         put(context, connection, diff, params)
             .then(resp => withModifiedRowIndex(resp, ds, diff))
             .then(r => ds.silentlySetRow(r.index, r.resp.data[0]));
+    }
+
+    function commitAppended(ds, oldRows, newRows) {
+        post(context, connection, appendedRows(params.pkFields, newRows), params);
+    }
+
+    function datasetOnCommit(ds, oldRows, newRows) {
+        if ( newRows.length > oldRows.length ) {
+            commitAppended(ds, oldRows, newRows);
+        } else {
+            commitEdited(ds, oldRows, newRows);
+        }
     }
 
     dataSet.onCommit(datasetOnCommit);

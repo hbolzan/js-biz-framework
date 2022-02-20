@@ -20,7 +20,7 @@ function _delete(context, resource) {
 
 function _send(method, context, resource, payload) {
     return context.global.fetch(
-        context.buildUrl(context, resource),
+        context.trace(context.buildUrl(context, resource)),
         assocIf(
             {
                 method: method,
@@ -30,7 +30,7 @@ function _send(method, context, resource, payload) {
                 }
             },
             "body",
-            payload ? JSON.stringify(payload) : null
+            context.trace(payload) ? JSON.stringify(payload) : null
         )
     ).then(r => r.json());
 }
