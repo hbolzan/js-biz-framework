@@ -1,5 +1,5 @@
 import { withQueryParams } from "../../logic/http.js";
-import { rowsDiff, withModifiedRowIndex, appendedRows } from "../../logic/data_provider.js";
+import { rowsDiff, withModifiedRowIndex, appendedRows, withAppendedRowIndex } from "../../logic/data_provider.js";
 import { datasetStates } from "../../logic/data_set.js";
 const baseUrl = "/api/data";
 
@@ -106,7 +106,9 @@ function WebMrpDataProvider(context, params={}) {
     }
 
     function commitAppended(ds, oldRows, newRows) {
-        post(context, connection, appendedRows(params.pkFields, newRows), params);
+        post(context, connection, appendedRows(params.pkFields, newRows), params)
+            .then(resp => withAppendedRowIndex(resp, ds, params.pkFields))
+            .then(r => ds.silentlySetRow(r.index, r.resp.data[0]));
     }
 
     function datasetOnCommit(ds, oldRows, newRows) {

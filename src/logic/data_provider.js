@@ -44,6 +44,15 @@ function indexByPk(ds, diff) {
     return first(ds.find(row => row[pk] === id));
 }
 
+function withAppendedRowIndex(resp, ds, pkFields) {
+    console.log(resp);
+    if ( ! responseIsOk(resp) ) {
+        return null;
+    }
+    const pkField = first(pkFields);
+    return { resp, index: first(ds.find(row => _.isNull(row[pkField]))) };
+}
+
 function withModifiedRowIndex(resp, ds, diff) {
     if ( ! responseIsOk(resp) ) {
         return null;
@@ -55,4 +64,5 @@ export {
     rowsDiff,
     withModifiedRowIndex,
     appendedRows,
+    withAppendedRowIndex,
 };
